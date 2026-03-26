@@ -23,7 +23,9 @@ app.use('/bff', async (req, res) => {
       method: req.method,
       headers: {
         'Content-Type': 'application/json',
-        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+        'Accept': 'application/json',
+        'Accept-Language': 'it-IT,it;q=0.9',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
         'Origin': 'https://www.lefrecce.it',
         'Referer': 'https://www.lefrecce.it/',
       },

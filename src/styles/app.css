@@ -632,8 +632,14 @@ body {
   animation: fadeInUp 0.35s ease-out both;
 }
 
-.journey-field:nth-child(1) { animation-delay: 0ms; }
-.journey-field:nth-child(3) { animation-delay: 80ms; }
+.journey-field:nth-child(1) {
+  animation-delay: 0ms;
+  z-index: 30;
+}
+.journey-field:nth-child(3) {
+  animation-delay: 80ms;
+  z-index: 10;
+}
 
 .journey-label {
   display: flex;
