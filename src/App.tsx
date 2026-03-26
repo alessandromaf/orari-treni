@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import StationSearch from './components/StationSearch';
 import DepartureBoard from './components/DepartureBoard';
+import TrainSearch from './components/TrainSearch';
 import JourneySearch from './components/JourneySearch';
 import type { Station, AppView } from './types';
 import './styles/app.css';
@@ -32,6 +33,7 @@ export default function App() {
             {station && <DepartureBoard station={station} />}
           </>
         )}
+        {view === 'treno' && <TrainSearch />}
         {view === 'viaggio' && <JourneySearch />}
       </main>
 
@@ -46,6 +48,20 @@ export default function App() {
             <path d="M9 3v18" />
           </svg>
           <span>Stazione</span>
+        </button>
+        <button
+          className={`nav-item ${view === 'treno' ? 'active' : ''}`}
+          onClick={() => setView('treno')}
+        >
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2">
+            <rect x="4" y="3" width="16" height="14" rx="2" />
+            <path d="M9 17v4" />
+            <path d="M15 17v4" />
+            <path d="M7 21h10" />
+            <path d="M8 7h8" />
+            <path d="M8 11h8" />
+          </svg>
+          <span>Treno</span>
         </button>
         <button
           className={`nav-item ${view === 'viaggio' ? 'active' : ''}`}

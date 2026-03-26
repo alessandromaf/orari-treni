@@ -29,7 +29,7 @@ export interface Train {
 
 export type BoardType = 'partenze' | 'arrivi';
 
-export type AppView = 'stazione' | 'viaggio';
+export type AppView = 'stazione' | 'treno' | 'viaggio';
 
 export interface JourneySolution {
   origin: string;
@@ -48,4 +48,33 @@ export interface JourneyTrain {
   arrivalStation: string;
   departureTime: string;
   arrivalTime: string;
+}
+
+export interface TrainStop {
+  stazione: string;
+  programmata: string | null;
+  effettiva: string | null;
+  ritardo: number;
+  tipo: 'P' | 'F' | 'A'; // Partenza, Fermata, Arrivo
+  binario: string;
+  actualFermpilesito?: string;
+}
+
+export interface TrainStatus {
+  numeroTreno: number;
+  compNumeroTreno: string;
+  categoria: string;
+  categoriaDescrizione: string;
+  origine: string;
+  destinazione: string;
+  orarioPartenza: number | null;
+  orarioArrivo: number | null;
+  ritardo: number;
+  compRitardo: string[];
+  tipoTreno: string;
+  circolante: boolean;
+  provpilesito: string;
+  stops: TrainStop[];
+  subTitle: string;
+  lastDetection: string;
 }

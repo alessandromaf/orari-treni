@@ -1,4 +1,4 @@
-import type { Station, Train, JourneySolution } from '../types';
+import type { Station, Train, JourneySolution, TrainStatus, TrainStop } from '../types';
 
 const API_BASE = '/api';
 const BFF_WORKER = 'https://orari-treni-bff.alessandro-000.workers.dev';
@@ -38,6 +38,63 @@ export async function getArrivals(stationCode: string, datetime?: Date): Promise
   const res = await fetch(`${API_BASE}/arrivi/${stationCode}/${encodeURIComponent(dateStr)}`);
   if (!res.ok) return [];
   return res.json();
+}
+
+export async function searchTrainNumber(trainNumber: string): Promise<{ originCode: string; trainNum: number } | null> {
+  const res = await fetch(`${API_BASE}/cercaNumeroTrenoTrenoAutocomplete/${encodeURIComponent(trainNumber)}`);
+  const text = await res.text();
+  if (!text.trim()) return null;
+
+  // Response format: "trainNum - originStation|trainNum-originCode\n..."
+  const firstLine = text.trim().split('\n')[0];
+  const parts = firstLine.split('|');
+  if (parts.length < 2) return null;
+
+  const [trainNum, originCode] = parts[1].split('-');
+  return { originCode: originCode.trim(), trainNum: parseInt(trainNum.trim(), 10) };
+}
+
+export async function getTrainStatus(originCode: string, trainNumber: number): Promise<TrainStatus | null> {
+  const res = await fetch(`${API_BASE}/andamentoTreno/${originCode}/${trainNumber}`);
+  if (!res.ok) return null;
+
+  const data = await res.json();
+  if (!data) return null;
+
+  const formatTime = (ts: number | null) => {
+    if (!ts) return null;
+    return new Date(ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const stops: TrainStop[] = (data.fermate || []).map((f: any) => ({
+    stazione: f.stazione || '',
+    programmata: formatTime(f.programmata),
+    effettiva: formatTime(f.effettiva),
+    ritardo: f.ritardoPartenza ?? f.ritardoArrivo ?? 0,
+    tipo: f.tipoFermata as 'P' | 'F' | 'A',
+    binario: f.binarioEffettivoPartenzaDescrizione || f.binarioProgrammatoPartenzaDescrizione || f.binarioEffettivoArrivoDescrizione || f.binarioProgrammatoArrivoDescrizione || '',
+    actualFermpilesito: f.actualFermataType?.toString() || '',
+  }));
+
+  return {
+    numeroTreno: data.numeroTreno,
+    compNumeroTreno: data.compNumeroTreno || `${data.numeroTreno}`,
+    categoria: data.categoria || '',
+    categoriaDescrizione: data.categoriaDescrizione || data.categoria || '',
+    origine: data.origine || '',
+    destinazione: data.destinazione || '',
+    orarioPartenza: data.orarioPartenza,
+    orarioArrivo: data.orarioArrivo,
+    ritardo: data.ritardo ?? 0,
+    compRitardo: data.compRitardo || [],
+    tipoTreno: data.tipoTreno || '',
+    circolante: data.circolante ?? false,
+    provpilesito: data.provpilesito || '',
+    stops,
+    subTitle: data.subTitle || '',
+    lastDetection: data.stazioneUltimoRilevamento || '',
+  };
 }
 
 function stationCodeToLocationId(code: string): number {
