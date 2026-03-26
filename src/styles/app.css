@@ -691,7 +691,7 @@ body {
   border: 2px solid var(--surface);
   border-radius: 50%;
   cursor: pointer;
-  z-index: 5;
+  z-index: 35;
   box-shadow: 0 2px 8px rgba(26, 115, 232, 0.3);
   transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s;
 }
