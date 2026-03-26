@@ -9,9 +9,16 @@ export default function TrainSearch() {
   const [train, setTrain] = useState<TrainStatus | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
+  function extractTrainNumber(input: string): string {
+    // Strip category prefixes like "FR ", "REG ", "IC ", "FA ", "FB ", "ES ", etc.
+    const cleaned = input.trim().replace(/^[A-Za-z]+\s*/i, '');
+    // Return just the digits
+    return cleaned.replace(/\D/g, '');
+  }
+
   async function handleSearch(e?: React.FormEvent) {
     e?.preventDefault();
-    const num = query.trim();
+    const num = extractTrainNumber(query);
     if (!num) return;
 
     setLoading(true);
@@ -70,9 +77,8 @@ export default function TrainSearch() {
           <input
             ref={inputRef}
             className="search-input"
-            type="number"
-            inputMode="numeric"
-            placeholder="Numero treno (es. 9611)"
+            type="text"
+            placeholder="Numero treno (es. FR 9514, 4612)"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -82,7 +88,7 @@ export default function TrainSearch() {
             </button>
           )}
         </div>
-        <button type="submit" className="search-btn" disabled={!query.trim() || loading}>
+        <button type="submit" className="search-btn" disabled={!extractTrainNumber(query) || loading}>
           {loading ? 'Ricerca...' : 'Cerca treno'}
         </button>
       </form>
