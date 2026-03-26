@@ -3,6 +3,7 @@ import type { Train, BoardType } from '../types';
 interface Props {
   train: Train;
   type: BoardType;
+  onClick?: () => void;
 }
 
 function getDelayClass(ritardo: number, circolante: boolean): string {
@@ -19,7 +20,7 @@ function formatDelay(ritardo: number, circolante: boolean): string {
   return `${ritardo} min`;
 }
 
-export default function TrainRow({ train, type }: Props) {
+export default function TrainRow({ train, type, onClick }: Props) {
   const delayClass = getDelayClass(train.ritardo, train.circolante);
   const time = type === 'partenze' ? train.compOrarioPartenza : train.compOrarioArrivo;
   const station = type === 'partenze' ? train.destinazione : train.origine;
@@ -33,7 +34,7 @@ export default function TrainRow({ train, type }: Props) {
     : `${train.categoria || ''} ${train.numeroTreno}`;
 
   return (
-    <div className={`train-row ${!train.circolante ? 'cancelled' : ''}`}>
+    <div className={`train-row ${!train.circolante ? 'cancelled' : ''}`} onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
       <div className="train-time">
         <span className="time">{time}</span>
         <span className={`delay ${delayClass}`}>

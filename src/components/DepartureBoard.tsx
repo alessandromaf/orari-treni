@@ -5,6 +5,7 @@ import type { Station, Train, BoardType } from '../types';
 
 interface Props {
   station: Station;
+  onTrainClick?: (trainNumber: number, originCode: string) => void;
 }
 
 function toLocalDatetimeString(date: Date): string {
@@ -16,7 +17,7 @@ function toLocalDatetimeString(date: Date): string {
   return `${y}-${m}-${d}T${h}:${min}`;
 }
 
-export default function DepartureBoard({ station }: Props) {
+export default function DepartureBoard({ station, onTrainClick }: Props) {
   const [boardType, setBoardType] = useState<BoardType>('partenze');
   const [trains, setTrains] = useState<Train[]>([]);
   const [loading, setLoading] = useState(true);
@@ -131,7 +132,12 @@ export default function DepartureBoard({ station }: Props) {
 
       <div className="train-list">
         {trains.map((train, i) => (
-          <TrainRow key={`${train.numeroTreno}-${i}`} train={train} type={boardType} />
+          <TrainRow
+            key={`${train.numeroTreno}-${i}`}
+            train={train}
+            type={boardType}
+            onClick={onTrainClick ? () => onTrainClick(train.numeroTreno, train.codOrigine) : undefined}
+          />
         ))}
       </div>
     </div>

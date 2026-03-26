@@ -9,6 +9,12 @@ import './styles/app.css';
 export default function App() {
   const [station, setStation] = useState<Station | null>(null);
   const [view, setView] = useState<AppView>('stazione');
+  const [pendingTrain, setPendingTrain] = useState<{ trainNumber: number; originCode: string } | null>(null);
+
+  function handleTrainClick(trainNumber: number, originCode: string) {
+    setPendingTrain({ trainNumber, originCode });
+    setView('treno');
+  }
 
   return (
     <div className="app">
@@ -30,10 +36,10 @@ export default function App() {
         {view === 'stazione' && (
           <>
             <StationSearch onSelect={setStation} selectedStation={station} />
-            {station && <DepartureBoard station={station} />}
+            {station && <DepartureBoard station={station} onTrainClick={handleTrainClick} />}
           </>
         )}
-        {view === 'treno' && <TrainSearch />}
+        {view === 'treno' && <TrainSearch initialTrain={pendingTrain} />}
         {view === 'viaggio' && <JourneySearch />}
       </main>
 

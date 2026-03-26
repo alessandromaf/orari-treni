@@ -3,7 +3,11 @@ import { searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
 import type { TrainAutocompleteResult } from '../api/viaggiatreno';
 import type { TrainStatus } from '../types';
 
-export default function TrainSearch() {
+interface Props {
+  initialTrain?: { trainNumber: number; originCode: string } | null;
+}
+
+export default function TrainSearch({ initialTrain }: Props) {
   const [query, setQuery] = useState('');
   const [suggestions, setSuggestions] = useState<TrainAutocompleteResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -12,6 +16,17 @@ export default function TrainSearch() {
   const [train, setTrain] = useState<TrainStatus | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const lastInitialRef = useRef<string>('');
+
+  // Auto-load when navigated from departure/arrival board
+  useEffect(() => {
+    if (!initialTrain) return;
+    const key = `${initialTrain.originCode}-${initialTrain.trainNumber}`;
+    if (key === lastInitialRef.current) return;
+    lastInitialRef.current = key;
+    setQuery(String(initialTrain.trainNumber));
+    fetchTrain(initialTrain.originCode, initialTrain.trainNumber);
+  }, [initialTrain]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function extractNumber(input: string): string {
     const cleaned = input.trim().replace(/^[A-Za-z]+\s*/i, '');
