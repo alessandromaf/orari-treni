@@ -149,6 +149,7 @@ body {
 .station-search {
   padding: 16px 16px 0;
   position: relative;
+  z-index: 20;
   animation: fadeInUp 0.4s ease-out;
 }
 
@@ -229,7 +230,7 @@ body {
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   max-height: 300px;
   overflow-y: auto;
-  z-index: 50;
+  z-index: 90;
   margin-top: 4px;
   animation: slideDown 0.2s ease-out;
 }
@@ -275,6 +276,8 @@ body {
 /* Board */
 .board {
   padding: 16px;
+  position: relative;
+  z-index: 1;
   animation: fadeInUp 0.35s ease-out;
 }
 
@@ -618,6 +621,7 @@ body {
 
 .journey-stations {
   position: relative;
+  z-index: 20;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -663,7 +667,7 @@ body {
   top: 100%;
   left: 0;
   right: 0;
-  z-index: 60;
+  z-index: 90;
 }
 
 .swap-btn {

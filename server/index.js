@@ -21,7 +21,12 @@ app.use('/bff', async (req, res) => {
   try {
     const options = {
       method: req.method,
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15',
+        'Origin': 'https://www.lefrecce.it',
+        'Referer': 'https://www.lefrecce.it/',
+      },
     };
     if ((req.method === 'POST' || req.method === 'PUT') && req.body) {
       options.body = JSON.stringify(req.body);
