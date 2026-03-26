@@ -1,45 +1,91 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
+import type { TrainAutocompleteResult } from '../api/viaggiatreno';
 import type { TrainStatus } from '../types';
 
 export default function TrainSearch() {
   const [query, setQuery] = useState('');
+  const [suggestions, setSuggestions] = useState<TrainAutocompleteResult[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [train, setTrain] = useState<TrainStatus | null>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
-  function extractTrainNumber(input: string): string {
-    // Strip category prefixes like "FR ", "REG ", "IC ", "FA ", "FB ", "ES ", etc.
+  function extractNumber(input: string): string {
     const cleaned = input.trim().replace(/^[A-Za-z]+\s*/i, '');
-    // Return just the digits
     return cleaned.replace(/\D/g, '');
+  }
+
+  const fetchSuggestions = useCallback((value: string) => {
+    const num = extractNumber(value);
+    if (!num || num.length < 1) {
+      setSuggestions([]);
+      setShowSuggestions(false);
+      return;
+    }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(async () => {
+      const results = await searchTrainNumber(num);
+      setSuggestions(results);
+      setShowSuggestions(results.length > 0);
+    }, 300);
+  }, []);
+
+  useEffect(() => {
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
+
+  function handleInputChange(value: string) {
+    setQuery(value);
+    setError('');
+    fetchSuggestions(value);
+  }
+
+  async function handleSelectSuggestion(suggestion: TrainAutocompleteResult) {
+    setQuery(suggestion.label);
+    setShowSuggestions(false);
+    setSuggestions([]);
+    await fetchTrain(suggestion.originCode, suggestion.trainNum);
   }
 
   async function handleSearch(e?: React.FormEvent) {
     e?.preventDefault();
-    const num = extractTrainNumber(query);
+    const num = extractNumber(query);
     if (!num) return;
 
+    setShowSuggestions(false);
     setLoading(true);
     setError('');
     setTrain(null);
 
     try {
-      const result = await searchTrainNumber(num);
-      if (!result) {
+      const results = await searchTrainNumber(num);
+      if (!results.length) {
         setError('Treno non trovato');
         setLoading(false);
         return;
       }
+      await fetchTrain(results[0].originCode, results[0].trainNum);
+    } catch {
+      setError('Errore di connessione');
+      setLoading(false);
+    }
+  }
 
-      const status = await getTrainStatus(result.originCode, result.trainNum);
+  async function fetchTrain(originCode: string, trainNum: number) {
+    setLoading(true);
+    setError('');
+    setTrain(null);
+
+    try {
+      const status = await getTrainStatus(originCode, trainNum);
       if (!status) {
         setError('Impossibile ottenere lo stato del treno');
-        setLoading(false);
         return;
       }
-
       setTrain(status);
     } catch {
       setError('Errore di connessione');
@@ -69,26 +115,44 @@ export default function TrainSearch() {
   return (
     <div className="train-search">
       <form className="train-search-form" onSubmit={handleSearch}>
-        <div className="train-search-input-wrapper">
-          <svg className="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
-            <circle cx="11" cy="11" r="8" />
-            <path d="m21 21-4.3-4.3" />
-          </svg>
-          <input
-            ref={inputRef}
-            className="search-input"
-            type="text"
-            placeholder="Numero treno (es. FR 9514, 4612)"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-          />
-          {query && (
-            <button type="button" className="clear-btn" onClick={() => { setQuery(''); setTrain(null); setError(''); inputRef.current?.focus(); }}>
-              &times;
-            </button>
+        <div className="train-search-field">
+          <div className="train-search-input-wrapper">
+            <svg className="search-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="11" cy="11" r="8" />
+              <path d="m21 21-4.3-4.3" />
+            </svg>
+            <input
+              ref={inputRef}
+              className="search-input"
+              type="text"
+              placeholder="Numero treno (es. FR 9514, 4612)"
+              value={query}
+              onChange={(e) => handleInputChange(e.target.value)}
+              onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
+              onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
+            />
+            {query && (
+              <button type="button" className="clear-btn" onClick={() => { setQuery(''); setTrain(null); setError(''); setSuggestions([]); inputRef.current?.focus(); }}>
+                &times;
+              </button>
+            )}
+          </div>
+          {showSuggestions && suggestions.length > 0 && (
+            <div className="dropdown">
+              {suggestions.map((s, i) => (
+                <button
+                  key={`${s.trainNum}-${s.originCode}-${i}`}
+                  type="button"
+                  className="dropdown-item"
+                  onMouseDown={() => handleSelectSuggestion(s)}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </div>
           )}
         </div>
-        <button type="submit" className="search-btn" disabled={!extractTrainNumber(query) || loading}>
+        <button type="submit" className="search-btn" disabled={!extractNumber(query) || loading}>
           {loading ? 'Ricerca...' : 'Cerca treno'}
         </button>
       </form>

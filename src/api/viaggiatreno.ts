@@ -40,22 +40,37 @@ export async function getArrivals(stationCode: string, datetime?: Date): Promise
   return res.json();
 }
 
-export async function searchTrainNumber(trainNumber: string): Promise<{ originCode: string; trainNum: number } | null> {
+export interface TrainAutocompleteResult {
+  label: string;       // e.g. "9514 - NAPOLI CENTRALE"
+  trainNum: number;
+  originCode: string;
+}
+
+export async function searchTrainNumber(trainNumber: string): Promise<TrainAutocompleteResult[]> {
+  if (!trainNumber.trim()) return [];
   const res = await fetch(`${API_BASE}/cercaNumeroTrenoTrenoAutocomplete/${encodeURIComponent(trainNumber)}`);
   const text = await res.text();
-  if (!text.trim()) return null;
+  if (!text.trim()) return [];
 
   // Response format: "trainNum - originStation|trainNum-originCode\n..."
-  const firstLine = text.trim().split('\n')[0];
-  const parts = firstLine.split('|');
-  if (parts.length < 2) return null;
-
-  const [trainNum, originCode] = parts[1].split('-');
-  return { originCode: originCode.trim(), trainNum: parseInt(trainNum.trim(), 10) };
+  return text.trim().split('\n').map((line) => {
+    const [label, key] = line.split('|');
+    if (!key) return null;
+    const [trainNum, originCode] = key.split('-');
+    return {
+      label: label.trim(),
+      trainNum: parseInt(trainNum.trim(), 10),
+      originCode: originCode.trim(),
+    };
+  }).filter((r): r is TrainAutocompleteResult => r !== null);
 }
 
 export async function getTrainStatus(originCode: string, trainNumber: number): Promise<TrainStatus | null> {
-  const res = await fetch(`${API_BASE}/andamentoTreno/${originCode}/${trainNumber}`);
+  // Need departure date — use today at midnight
+  const now = new Date();
+  now.setHours(0, 0, 0, 0);
+  const depDate = now.getTime();
+  const res = await fetch(`${API_BASE}/andamentoTreno/${originCode}/${trainNumber}/${depDate}`);
   if (!res.ok) return null;
 
   const data = await res.json();

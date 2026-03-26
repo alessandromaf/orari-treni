@@ -940,6 +940,16 @@ body {
   gap: 12px;
 }
 
+.train-search-field {
+  position: relative;
+  z-index: 20;
+}
+
+.train-search-field .dropdown {
+  left: 0;
+  right: 0;
+}
+
 .train-search-input-wrapper {
   position: relative;
   display: flex;
