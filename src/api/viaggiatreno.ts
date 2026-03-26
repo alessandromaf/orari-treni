@@ -1,6 +1,7 @@
 import type { Station, Train, JourneySolution } from '../types';
 
 const API_BASE = '/api';
+const BFF_WORKER = 'https://orari-treni-bff.alessandro-000.workers.dev';
 
 export async function searchStations(query: string): Promise<Station[]> {
   if (query.length < 2) return [];
@@ -59,7 +60,7 @@ export async function searchSolutions(
   const min = String(datetime.getMinutes()).padStart(2, '0');
   const isoTime = `${y}-${m}-${d}T${h}:${min}:00`;
 
-  const res = await fetch('/bff/website/ticket/solutions', {
+  const res = await fetch(`${BFF_WORKER}/website/ticket/solutions`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
