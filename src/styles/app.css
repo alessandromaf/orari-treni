@@ -130,25 +130,25 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: 0 2px 12px rgba(26, 115, 232, 0.3);
-}
-
-.app-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
 
 .app-header h1 {
+  margin: 0;
   font-size: 20px;
   font-weight: 600;
   display: flex;
   align-items: center;
   gap: 8px;
+  line-height: 1;
   animation: fadeIn 0.4s ease-out;
 }
 
-.app-header svg {
+.app-header h1 svg {
   flex-shrink: 0;
+  display: block;
 }
 
 .lang-picker {
@@ -167,7 +167,12 @@ body {
   cursor: pointer;
   font-size: 13px;
   font-weight: 600;
+  line-height: 1;
   transition: background 0.2s;
+}
+
+.lang-toggle svg {
+  display: block;
 }
 
 .lang-toggle:active {
