@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import StationSearch from './components/StationSearch';
 import DepartureBoard from './components/DepartureBoard';
 import TrainSearch from './components/TrainSearch';
@@ -12,8 +12,19 @@ export default function App() {
   const [view, setView] = useState<AppView>('stazione');
   const [pendingTrain, setPendingTrain] = useState<{ trainNumber: number; originCode: string } | null>(null);
   const [, setLangTick] = useState(0);
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => onLanguageChange(() => setLangTick(n => n + 1)), []);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    function close(e: MouseEvent) {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    }
+    document.addEventListener('mousedown', close);
+    return () => document.removeEventListener('mousedown', close);
+  }, [langOpen]);
 
   function handleTrainClick(trainNumber: number, originCode: string) {
     setPendingTrain({ trainNumber, originCode });
@@ -34,16 +45,28 @@ export default function App() {
           </svg>
           {t('appTitle')}
         </h1>
-        <div className="lang-picker">
-          {SUPPORTED_LANGS.map(({ code, flag }) => (
-            <button
-              key={code}
-              className={`lang-btn ${getLang() === code ? 'active' : ''}`}
-              onClick={() => setLanguage(code)}
-            >
-              {flag}
-            </button>
-          ))}
+        <div className="lang-picker" ref={langRef}>
+          <button className="lang-toggle" onClick={() => setLangOpen(!langOpen)} aria-label="Language">
+            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
+              <circle cx="12" cy="12" r="10" />
+              <ellipse cx="12" cy="12" rx="4" ry="10" />
+              <path d="M2 12h20" />
+            </svg>
+            <span className="lang-code">{getLang().toUpperCase()}</span>
+          </button>
+          {langOpen && (
+            <div className="lang-dropdown">
+              {SUPPORTED_LANGS.map(({ code, label }) => (
+                <button
+                  key={code}
+                  className={`lang-option ${getLang() === code ? 'active' : ''}`}
+                  onClick={() => { setLanguage(code); setLangOpen(false); }}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 

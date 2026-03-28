@@ -171,10 +171,10 @@ const translations = {
 
 type TranslationKey = keyof typeof translations.it;
 
-export const SUPPORTED_LANGS: { code: Lang; flag: string }[] = [
-  { code: 'it', flag: '🇮🇹' },
-  { code: 'en', flag: '🇬🇧' },
-  { code: 'ru', flag: '🇷🇺' },
+export const SUPPORTED_LANGS: { code: Lang; label: string }[] = [
+  { code: 'it', label: 'Italiano' },
+  { code: 'en', label: 'English' },
+  { code: 'ru', label: 'Русский' },
 ];
 
 const LANG_KEY = 'appLang';
