@@ -1,5 +1,5 @@
 import type { Train, BoardType } from '../types';
-import { t, pickCompRitardo } from '../i18n';
+import { t } from '../i18n';
 
 interface Props {
   train: Train;
@@ -18,7 +18,7 @@ function isCancelled(train: Train): boolean {
 
 function getDelayClass(train: Train): string {
   if (!train.circolante) {
-    return isCancelled(train) ? 'delay-cancelled' : 'delay-not-started';
+    return isCancelled(train) ? 'delay-cancelled' : 'delay-ontime';
   }
   if (train.ritardo <= 0) return 'delay-ontime';
   if (train.ritardo <= 10) return 'delay-small';
@@ -28,9 +28,7 @@ function getDelayClass(train: Train): string {
 function formatDelay(train: Train): string {
   if (!train.circolante) {
     if (isCancelled(train)) return t('cancelled');
-    const status = pickCompRitardo(train.compRitardo || []);
-    if (status) return status;
-    return t('notStarted');
+    return t('onTime');
   }
   if (train.ritardo === 0) return t('onTime');
   if (train.ritardo > 0) return `+${train.ritardo} min`;

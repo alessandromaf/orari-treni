@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
 import type { TrainAutocompleteResult } from '../api/viaggiatreno';
-import { t, pickCompRitardo } from '../i18n';
+import { t } from '../i18n';
 import type { TrainStatus } from '../types';
 
 interface Props {
@@ -116,22 +116,20 @@ export default function TrainSearch({ initialTrain }: Props) {
     return 'delay-big';
   }
 
-  function getTrainDelayClass(t: TrainStatus) {
-    if (!t.circolante) {
-      const hints = [...(t.compRitardo || []), t.subTitle || ''].join(' ').toLowerCase();
+  function getTrainDelayClass(ts: TrainStatus) {
+    if (!ts.circolante) {
+      const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
       if (hints.includes('cancel') || hints.includes('soppress')) return 'delay-cancelled';
-      return 'delay-not-started';
+      return 'delay-ontime';
     }
-    return getDelayClass(t.ritardo);
+    return getDelayClass(ts.ritardo);
   }
 
   function getTrainDelayText(ts: TrainStatus) {
     if (!ts.circolante) {
       const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
       if (hints.includes('cancel') || hints.includes('soppress')) return t('cancelled');
-      const status = pickCompRitardo(ts.compRitardo || []);
-      if (status) return status;
-      return t('notStarted');
+      return t('onTime');
     }
     if (ts.ritardo < 0) return `${Math.abs(ts.ritardo)} ${t('earlyMin')}`;
     if (ts.ritardo === 0) return t('onTime');

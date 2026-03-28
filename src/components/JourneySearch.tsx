@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { searchStations, searchSolutions, searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
-import { t, pickCompRitardo } from '../i18n';
+import { t } from '../i18n';
 import type { Station, JourneySolution, TrainStatus } from '../types';
 
 function toLocalDatetimeString(date: Date): string {
@@ -205,7 +205,7 @@ function getStatusDelayClass(ts: TrainStatus) {
   if (!ts.circolante) {
     const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
     if (hints.includes('cancel') || hints.includes('soppress')) return 'delay-cancelled';
-    return 'delay-not-started';
+    return 'delay-ontime';
   }
   return getDelayClass(ts.ritardo);
 }
@@ -214,9 +214,7 @@ function getStatusDelayText(ts: TrainStatus) {
   if (!ts.circolante) {
     const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
     if (hints.includes('cancel') || hints.includes('soppress')) return t('cancelled');
-    const status = pickCompRitardo(ts.compRitardo || []);
-    if (status) return status;
-    return t('notStarted');
+    return t('onTime');
   }
   if (ts.ritardo === 0) return t('onTime');
   if (ts.ritardo > 0) return `+${ts.ritardo} min`;

@@ -543,6 +543,9 @@ body {
   padding: 1px 6px;
   border-radius: 4px;
   transition: all 0.3s;
+  min-width: 64px;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .delay-ontime {
