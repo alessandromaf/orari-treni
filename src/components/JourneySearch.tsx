@@ -217,8 +217,8 @@ function getStatusDelayText(ts: TrainStatus) {
     return t('onTime');
   }
   if (ts.ritardo === 0) return t('onTime');
-  if (ts.ritardo > 0) return `+${ts.ritardo} min`;
-  return `${ts.ritardo} min`;
+  if (ts.ritardo > 0) return `+${ts.ritardo} ${t('min')}`;
+  return `${ts.ritardo} ${t('min')}`;
 }
 
 interface SolutionCardProps {

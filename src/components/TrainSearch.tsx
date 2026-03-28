@@ -133,7 +133,7 @@ export default function TrainSearch({ initialTrain }: Props) {
     }
     if (ts.ritardo < 0) return `${Math.abs(ts.ritardo)} ${t('earlyMin')}`;
     if (ts.ritardo === 0) return t('onTime');
-    return `+${ts.ritardo} min`;
+    return `+${ts.ritardo} ${t('min')}`;
   }
 
   function getStopStatus(stop: { effettiva: string | null; actualFermpilesito?: string }) {

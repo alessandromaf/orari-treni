@@ -31,8 +31,8 @@ function formatDelay(train: Train): string {
     return t('onTime');
   }
   if (train.ritardo === 0) return t('onTime');
-  if (train.ritardo > 0) return `+${train.ritardo} min`;
-  return `${train.ritardo} min`;
+  if (train.ritardo > 0) return `+${train.ritardo} ${t('min')}`;
+  return `${train.ritardo} ${t('min')}`;
 }
 
 export default function TrainRow({ train, type, onClick }: Props) {

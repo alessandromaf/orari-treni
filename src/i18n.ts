@@ -37,7 +37,9 @@ const translations = {
     cancelled: 'Cancellato',
     notStarted: 'Non ancora partito',
     onTime: 'In orario',
+    min: 'min',
     earlyMin: 'min anticipo',
+    hours: 'h',
 
     // Train search
     trainNotFound: 'Treno non trovato',
@@ -92,7 +94,9 @@ const translations = {
     cancelled: 'Cancelled',
     notStarted: 'Not yet departed',
     onTime: 'On time',
+    min: 'min',
     earlyMin: 'min early',
+    hours: 'h',
 
     trainNotFound: 'Train not found',
     cannotGetStatus: 'Unable to get train status',
@@ -145,7 +149,9 @@ const translations = {
     cancelled: 'Отменён',
     notStarted: 'Ещё не отправлен',
     onTime: 'Вовремя',
+    min: 'мин',
     earlyMin: 'мин раньше',
+    hours: 'ч',
 
     trainNotFound: 'Поезд не найден',
     cannotGetStatus: 'Не удалось получить статус поезда',
@@ -232,5 +238,5 @@ export function pickCompRitardo(arr: string[]): string {
 export function formatDuration(diffMs: number): string {
   const h = Math.floor(diffMs / 3600000);
   const m = Math.round((diffMs % 3600000) / 60000);
-  return `${h}h ${String(m).padStart(2, '0')}min`;
+  return `${h}${t('hours')} ${String(m).padStart(2, '0')}${t('min')}`;
 }
