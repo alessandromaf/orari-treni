@@ -3,6 +3,7 @@ import StationSearch from './components/StationSearch';
 import DepartureBoard from './components/DepartureBoard';
 import TrainSearch from './components/TrainSearch';
 import JourneySearch from './components/JourneySearch';
+import { t } from './i18n';
 import type { Station, AppView } from './types';
 import './styles/app.css';
 
@@ -28,7 +29,7 @@ export default function App() {
             <circle cx="9" cy="15" r="1" />
             <circle cx="15" cy="15" r="1" />
           </svg>
-          Orari Treni
+          {t('appTitle')}
         </h1>
       </header>
 
@@ -40,7 +41,7 @@ export default function App() {
           </>
         )}
         {view === 'treno' && <TrainSearch initialTrain={pendingTrain} />}
-        {view === 'viaggio' && <JourneySearch />}
+        {view === 'viaggio' && <JourneySearch onTrainClick={handleTrainClick} />}
       </main>
 
       <nav className="bottom-nav">
@@ -53,7 +54,7 @@ export default function App() {
             <path d="M3 9h18" />
             <path d="M9 3v18" />
           </svg>
-          <span>Stazione</span>
+          <span>{t('navStation')}</span>
         </button>
         <button
           className={`nav-item ${view === 'treno' ? 'active' : ''}`}
@@ -67,7 +68,7 @@ export default function App() {
             <path d="M8 7h8" />
             <path d="M8 11h8" />
           </svg>
-          <span>Treno</span>
+          <span>{t('navTrain')}</span>
         </button>
         <button
           className={`nav-item ${view === 'viaggio' ? 'active' : ''}`}
@@ -79,7 +80,7 @@ export default function App() {
             <line x1="7" y1="12" x2="17" y2="12" />
             <polyline points="14 8 17 12 14 16" />
           </svg>
-          <span>Cerca viaggio</span>
+          <span>{t('navJourney')}</span>
         </button>
       </nav>
     </div>

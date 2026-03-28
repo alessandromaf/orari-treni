@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
 import type { TrainAutocompleteResult } from '../api/viaggiatreno';
+import { t } from '../i18n';
 import type { TrainStatus } from '../types';
 
 interface Props {
@@ -79,13 +80,13 @@ export default function TrainSearch({ initialTrain }: Props) {
     try {
       const results = await searchTrainNumber(num);
       if (!results.length) {
-        setError('Treno non trovato');
+        setError(t('trainNotFound'));
         setLoading(false);
         return;
       }
       await fetchTrain(results[0].originCode, results[0].trainNum);
     } catch {
-      setError('Errore di connessione');
+      setError(t('connectionError'));
       setLoading(false);
     }
   }
@@ -98,12 +99,12 @@ export default function TrainSearch({ initialTrain }: Props) {
     try {
       const status = await getTrainStatus(originCode, trainNum);
       if (!status) {
-        setError('Impossibile ottenere lo stato del treno');
+        setError(t('cannotGetStatus'));
         return;
       }
       setTrain(status);
     } catch {
-      setError('Errore di connessione');
+      setError(t('connectionError'));
     } finally {
       setLoading(false);
     }
@@ -115,10 +116,26 @@ export default function TrainSearch({ initialTrain }: Props) {
     return 'delay-big';
   }
 
-  function getDelayText(delay: number) {
-    if (delay < 0) return `${Math.abs(delay)} min anticipo`;
-    if (delay === 0) return 'In orario';
-    return `+${delay} min`;
+  function getTrainDelayClass(t: TrainStatus) {
+    if (!t.circolante) {
+      const hints = [...(t.compRitardo || []), t.subTitle || ''].join(' ').toLowerCase();
+      if (hints.includes('cancel') || hints.includes('soppress')) return 'delay-cancelled';
+      return 'delay-not-started';
+    }
+    return getDelayClass(t.ritardo);
+  }
+
+  function getTrainDelayText(ts: TrainStatus) {
+    if (!ts.circolante) {
+      const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
+      if (hints.includes('cancel') || hints.includes('soppress')) return t('cancelled');
+      const status = (ts.compRitardo || []).filter(s => s?.trim()).join(' ').trim();
+      if (status) return status;
+      return t('notStarted');
+    }
+    if (ts.ritardo < 0) return `${Math.abs(ts.ritardo)} ${t('earlyMin')}`;
+    if (ts.ritardo === 0) return t('onTime');
+    return `+${ts.ritardo} min`;
   }
 
   function getStopStatus(stop: { effettiva: string | null; actualFermpilesito?: string }) {
@@ -140,7 +157,7 @@ export default function TrainSearch({ initialTrain }: Props) {
               ref={inputRef}
               className="search-input"
               type="text"
-              placeholder="Numero treno (es. FR 9514, 4612)"
+              placeholder={t('trainPlaceholder')}
               value={query}
               onChange={(e) => handleInputChange(e.target.value)}
               onFocus={() => suggestions.length > 0 && setShowSuggestions(true)}
@@ -168,7 +185,7 @@ export default function TrainSearch({ initialTrain }: Props) {
           )}
         </div>
         <button type="submit" className="search-btn" disabled={!extractNumber(query) || loading}>
-          {loading ? 'Ricerca...' : 'Cerca treno'}
+          {loading ? t('search') : t('searchTrain')}
         </button>
       </form>
 
@@ -186,14 +203,14 @@ export default function TrainSearch({ initialTrain }: Props) {
             <div className="train-detail-name">
               <span className="train-badge-large">{train.categoriaDescrizione} {train.compNumeroTreno}</span>
             </div>
-            <div className={`train-detail-delay ${getDelayClass(train.ritardo)}`}>
-              {getDelayText(train.ritardo)}
+            <div className={`train-detail-delay ${getTrainDelayClass(train)}`}>
+              {getTrainDelayText(train)}
             </div>
           </div>
 
           <div className="train-detail-route">
             <div className="route-station">
-              <span className="route-label">Da</span>
+              <span className="route-label">{t('from')}</span>
               <span className="route-name">{train.origine}</span>
             </div>
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" strokeWidth="2">
@@ -201,14 +218,14 @@ export default function TrainSearch({ initialTrain }: Props) {
               <polyline points="12 5 19 12 12 19" />
             </svg>
             <div className="route-station">
-              <span className="route-label">A</span>
+              <span className="route-label">{t('to')}</span>
               <span className="route-name">{train.destinazione}</span>
             </div>
           </div>
 
           {train.lastDetection && (
             <div className="train-detail-detection">
-              Ultimo rilevamento: <strong>{train.lastDetection}</strong>
+              {t('lastDetection')} <strong>{train.lastDetection}</strong>
             </div>
           )}
 
@@ -235,7 +252,7 @@ export default function TrainSearch({ initialTrain }: Props) {
                   </div>
                   {stop.binario && (
                     <div className="timeline-platform">
-                      <span className="platform-label">Bin.</span>
+                      <span className="platform-label">{t('platform')}</span>
                       <span className="platform-number">{stop.binario}</span>
                     </div>
                   )}

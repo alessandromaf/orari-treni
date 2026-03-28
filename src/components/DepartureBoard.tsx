@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getDepartures, getArrivals } from '../api/viaggiatreno';
 import TrainRow from './TrainRow';
+import { t, getTimeLocale } from '../i18n';
 import type { Station, Train, BoardType } from '../types';
 
 interface Props {
@@ -38,7 +39,7 @@ export default function DepartureBoard({ station, onTrainClick }: Props) {
       setTrains(data);
       setLastUpdate(new Date());
     } catch {
-      setError('Errore nel caricamento dei dati');
+      setError(t('loadError'));
     } finally {
       setLoading(false);
     }
@@ -70,13 +71,13 @@ export default function DepartureBoard({ station, onTrainClick }: Props) {
           className={`tab ${boardType === 'partenze' ? 'active' : ''}`}
           onClick={() => setBoardType('partenze')}
         >
-          Partenze
+          {t('departures')}
         </button>
         <button
           className={`tab ${boardType === 'arrivi' ? 'active' : ''}`}
           onClick={() => setBoardType('arrivi')}
         >
-          Arrivi
+          {t('arrivals')}
         </button>
       </div>
 
@@ -89,11 +90,11 @@ export default function DepartureBoard({ station, onTrainClick }: Props) {
               <line x1="8" y1="2" x2="8" y2="6" />
               <line x1="3" y1="10" x2="21" y2="10" />
             </svg>
-            Data e ora
+            {t('dateTime')}
           </label>
           {isCustomTime && (
             <button className="now-btn" onClick={handleResetToNow}>
-              Adesso
+              {t('now')}
             </button>
           )}
         </div>
@@ -107,8 +108,8 @@ export default function DepartureBoard({ station, onTrainClick }: Props) {
 
       {lastUpdate && (
         <div className="last-update">
-          Aggiornato alle {lastUpdate.toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' })}
-          <button className="refresh-btn" onClick={fetchData} aria-label="Aggiorna">
+          {t('updatedAt')} {lastUpdate.toLocaleTimeString(getTimeLocale(), { hour: '2-digit', minute: '2-digit' })}
+          <button className="refresh-btn" onClick={fetchData} aria-label={t('refresh')}>
             <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2">
               <polyline points="23 4 23 10 17 10" />
               <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10" />
@@ -120,14 +121,14 @@ export default function DepartureBoard({ station, onTrainClick }: Props) {
       {loading && trains.length === 0 && (
         <div className="board-status">
           <div className="spinner" />
-          Caricamento...
+          {t('loading')}
         </div>
       )}
 
       {error && <div className="board-status error">{error}</div>}
 
       {!loading && !error && trains.length === 0 && (
-        <div className="board-status">Nessun treno trovato</div>
+        <div className="board-status">{t('noTrains')}</div>
       )}
 
       <div className="train-list">

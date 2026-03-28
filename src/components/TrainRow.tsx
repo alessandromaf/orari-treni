@@ -1,4 +1,5 @@
 import type { Train, BoardType } from '../types';
+import { t } from '../i18n';
 
 interface Props {
   train: Train;
@@ -6,22 +7,37 @@ interface Props {
   onClick?: () => void;
 }
 
-function getDelayClass(ritardo: number, circolante: boolean): string {
-  if (!circolante) return 'delay-cancelled';
-  if (ritardo <= 0) return 'delay-ontime';
-  if (ritardo <= 10) return 'delay-small';
+function isCancelled(train: Train): boolean {
+  const hints = [
+    ...(train.compRitardo || []),
+    train.subTitle || '',
+  ].join(' ').toLowerCase();
+  return hints.includes('cancel') || hints.includes('soppress');
+}
+
+function getDelayClass(train: Train): string {
+  if (!train.circolante) {
+    return isCancelled(train) ? 'delay-cancelled' : 'delay-not-started';
+  }
+  if (train.ritardo <= 0) return 'delay-ontime';
+  if (train.ritardo <= 10) return 'delay-small';
   return 'delay-big';
 }
 
-function formatDelay(ritardo: number, circolante: boolean): string {
-  if (!circolante) return 'Cancellato';
-  if (ritardo === 0) return 'In orario';
-  if (ritardo > 0) return `+${ritardo} min`;
-  return `${ritardo} min`;
+function formatDelay(train: Train): string {
+  if (!train.circolante) {
+    if (isCancelled(train)) return t('cancelled');
+    const status = (train.compRitardo || []).filter(s => s?.trim()).join(' ').trim();
+    if (status) return status;
+    return t('notStarted');
+  }
+  if (train.ritardo === 0) return t('onTime');
+  if (train.ritardo > 0) return `+${train.ritardo} min`;
+  return `${train.ritardo} min`;
 }
 
 export default function TrainRow({ train, type, onClick }: Props) {
-  const delayClass = getDelayClass(train.ritardo, train.circolante);
+  const delayClass = getDelayClass(train);
   const time = type === 'partenze' ? train.compOrarioPartenza : train.compOrarioArrivo;
   const station = type === 'partenze' ? train.destinazione : train.origine;
   const platform =
@@ -34,11 +50,11 @@ export default function TrainRow({ train, type, onClick }: Props) {
     : `${train.categoria || ''} ${train.numeroTreno}`;
 
   return (
-    <div className={`train-row ${!train.circolante ? 'cancelled' : ''}`} onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
+    <div className={`train-row ${!train.circolante && isCancelled(train) ? 'cancelled' : ''}`} onClick={onClick} style={onClick ? { cursor: 'pointer' } : undefined}>
       <div className="train-time">
         <span className="time">{time}</span>
         <span className={`delay ${delayClass}`}>
-          {formatDelay(train.ritardo, train.circolante)}
+          {formatDelay(train)}
         </span>
       </div>
       <div className="train-info">
@@ -48,7 +64,7 @@ export default function TrainRow({ train, type, onClick }: Props) {
       <div className="train-platform">
         {platform && (
           <>
-            <span className="platform-label">Bin.</span>
+            <span className="platform-label">{t('platform')}</span>
             <span className="platform-number">{platform}</span>
           </>
         )}

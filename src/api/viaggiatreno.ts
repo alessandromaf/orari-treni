@@ -1,4 +1,5 @@
 import type { Station, Train, JourneySolution, TrainStatus, TrainStop } from '../types';
+import { getTimeLocale, formatDuration } from '../i18n';
 
 const API_BASE = '/api';
 const BFF_WORKER = 'https://orari-treni-bff.alessandro-000.workers.dev';
@@ -76,9 +77,10 @@ export async function getTrainStatus(originCode: string, trainNumber: number): P
   const data = await res.json();
   if (!data) return null;
 
+  const locale = getTimeLocale();
   const formatTime = (ts: number | null) => {
     if (!ts) return null;
-    return new Date(ts).toLocaleTimeString('it-IT', { hour: '2-digit', minute: '2-digit' });
+    return new Date(ts).toLocaleTimeString(locale, { hour: '2-digit', minute: '2-digit' });
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -161,6 +163,7 @@ export async function searchSolutions(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const solutions: any[] = data.solutions || [];
 
+  const locale = getTimeLocale();
   const timeOpts: Intl.DateTimeFormatOptions = { hour: '2-digit', minute: '2-digit' };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -169,9 +172,7 @@ export async function searchSolutions(
     const depDate = new Date(s.departureTime);
     const arrDate = new Date(s.arrivalTime);
     const diffMs = arrDate.getTime() - depDate.getTime();
-    const diffH = Math.floor(diffMs / 3600000);
-    const diffM = Math.round((diffMs % 3600000) / 60000);
-    const duration = `${diffH}h ${String(diffM).padStart(2, '0')}min`;
+    const duration = formatDuration(diffMs);
 
     // Per-leg details come from nodes (each node = one train leg)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -180,13 +181,14 @@ export async function searchSolutions(
       name: node.train
         ? `${node.train.trainCategory || node.train.acronym || ''} ${node.train.name || ''}`.trim()
         : '',
+      trainNumber: node.train?.name ? parseInt(node.train.name, 10) || null : null,
       departureStation: node.origin || '',
       arrivalStation: node.destination || '',
       departureTime: node.departureTime
-        ? new Date(node.departureTime).toLocaleTimeString('it-IT', timeOpts)
+        ? new Date(node.departureTime).toLocaleTimeString(locale, timeOpts)
         : '',
       arrivalTime: node.arrivalTime
-        ? new Date(node.arrivalTime).toLocaleTimeString('it-IT', timeOpts)
+        ? new Date(node.arrivalTime).toLocaleTimeString(locale, timeOpts)
         : '',
     }));
 
@@ -196,8 +198,8 @@ export async function searchSolutions(
     return {
       origin: s.origin || '',
       destination: s.destination || '',
-      departureTime: depDate.toLocaleTimeString('it-IT', timeOpts),
-      arrivalTime: arrDate.toLocaleTimeString('it-IT', timeOpts),
+      departureTime: depDate.toLocaleTimeString(locale, timeOpts),
+      arrivalTime: arrDate.toLocaleTimeString(locale, timeOpts),
       duration,
       trains,
       price,

@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { searchStations } from '../api/viaggiatreno';
+import { t } from '../i18n';
 import type { Station } from '../types';
 
 const POPULAR_STATIONS: Station[] = [
@@ -101,14 +102,14 @@ export default function StationSearch({ onSelect, selectedStation }: Props) {
         </svg>
         <input
           type="text"
-          placeholder="Cerca stazione..."
+          placeholder={t('searchStation')}
           value={query}
           onChange={(e) => handleInput(e.target.value)}
           onFocus={handleFocus}
           className="search-input"
         />
         {query && (
-          <button className="clear-btn" onClick={handleClear} aria-label="Cancella">
+          <button className="clear-btn" onClick={handleClear} aria-label={t('clear')}>
             &times;
           </button>
         )}
@@ -122,7 +123,7 @@ export default function StationSearch({ onSelect, selectedStation }: Props) {
 
       {showDropdown && (
         <div className="dropdown">
-          {loading && <div className="dropdown-item loading">Ricerca...</div>}
+          {loading && <div className="dropdown-item loading">{t('search')}</div>}
 
           {!loading && results.length > 0 && (
             <>
@@ -142,7 +143,7 @@ export default function StationSearch({ onSelect, selectedStation }: Props) {
             <>
               {recentStations.length > 0 && (
                 <>
-                  <div className="dropdown-header">Recenti</div>
+                  <div className="dropdown-header">{t('recent')}</div>
                   {recentStations.map((station) => (
                     <button
                       key={`recent-${station.code}`}
@@ -154,7 +155,7 @@ export default function StationSearch({ onSelect, selectedStation }: Props) {
                   ))}
                 </>
               )}
-              <div className="dropdown-header">Stazioni principali</div>
+              <div className="dropdown-header">{t('popularStations')}</div>
               {POPULAR_STATIONS.map((station) => (
                 <button
                   key={`pop-${station.code}`}
@@ -168,7 +169,7 @@ export default function StationSearch({ onSelect, selectedStation }: Props) {
           )}
 
           {!loading && query.length >= 2 && results.length === 0 && (
-            <div className="dropdown-item loading">Nessun risultato</div>
+            <div className="dropdown-item loading">{t('noResults')}</div>
           )}
         </div>
       )}

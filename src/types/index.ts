@@ -44,6 +44,7 @@ export interface JourneySolution {
 
 export interface JourneyTrain {
   name: string;
+  trainNumber: number | null;
   departureStation: string;
   arrivalStation: string;
   departureTime: string;
