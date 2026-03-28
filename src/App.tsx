@@ -1,9 +1,9 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import StationSearch from './components/StationSearch';
 import DepartureBoard from './components/DepartureBoard';
 import TrainSearch from './components/TrainSearch';
 import JourneySearch from './components/JourneySearch';
-import { t } from './i18n';
+import { t, getLang, setLanguage, onLanguageChange, SUPPORTED_LANGS } from './i18n';
 import type { Station, AppView } from './types';
 import './styles/app.css';
 
@@ -11,6 +11,9 @@ export default function App() {
   const [station, setStation] = useState<Station | null>(null);
   const [view, setView] = useState<AppView>('stazione');
   const [pendingTrain, setPendingTrain] = useState<{ trainNumber: number; originCode: string } | null>(null);
+  const [, setLangTick] = useState(0);
+
+  useEffect(() => onLanguageChange(() => setLangTick(n => n + 1)), []);
 
   function handleTrainClick(trainNumber: number, originCode: string) {
     setPendingTrain({ trainNumber, originCode });
@@ -31,6 +34,17 @@ export default function App() {
           </svg>
           {t('appTitle')}
         </h1>
+        <div className="lang-picker">
+          {SUPPORTED_LANGS.map(({ code, flag }) => (
+            <button
+              key={code}
+              className={`lang-btn ${getLang() === code ? 'active' : ''}`}
+              onClick={() => setLanguage(code)}
+            >
+              {flag}
+            </button>
+          ))}
+        </div>
       </header>
 
       <main className="main-content">

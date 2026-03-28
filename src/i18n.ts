@@ -171,17 +171,45 @@ const translations = {
 
 type TranslationKey = keyof typeof translations.it;
 
-const supportedLangs: Record<string, Lang> = { it: 'it', ru: 'ru' };
+export const SUPPORTED_LANGS: { code: Lang; flag: string }[] = [
+  { code: 'it', flag: '🇮🇹' },
+  { code: 'en', flag: '🇬🇧' },
+  { code: 'ru', flag: '🇷🇺' },
+];
+
+const LANG_KEY = 'appLang';
+const langMap: Record<string, Lang> = { it: 'it', ru: 'ru' };
 
 function detectLanguage(): Lang {
+  const saved = localStorage.getItem(LANG_KEY);
+  if (saved && saved in translations) return saved as Lang;
   const lang = navigator.language?.slice(0, 2).toLowerCase();
-  return supportedLangs[lang] ?? 'en';
+  return langMap[lang] ?? 'en';
 }
 
-const currentLang: Lang = detectLanguage();
+let currentLang: Lang = detectLanguage();
+const listeners: Array<() => void> = [];
+
+export function getLang(): Lang {
+  return currentLang;
+}
+
+export function setLanguage(lang: Lang) {
+  currentLang = lang;
+  localStorage.setItem(LANG_KEY, lang);
+  listeners.forEach(fn => fn());
+}
+
+export function onLanguageChange(fn: () => void): () => void {
+  listeners.push(fn);
+  return () => {
+    const i = listeners.indexOf(fn);
+    if (i >= 0) listeners.splice(i, 1);
+  };
+}
 
 export function t(key: TranslationKey): string {
-  return translations[currentLang][key] ?? translations.it[key];
+  return translations[currentLang][key] ?? translations.en[key];
 }
 
 const timeLocales: Record<Lang, string> = { it: 'it-IT', en: 'en-GB', ru: 'ru-RU' };
