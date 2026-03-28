@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
 import type { TrainAutocompleteResult } from '../api/viaggiatreno';
-import { t } from '../i18n';
+import { t, pickCompRitardo } from '../i18n';
 import type { TrainStatus } from '../types';
 
 interface Props {
@@ -129,7 +129,7 @@ export default function TrainSearch({ initialTrain }: Props) {
     if (!ts.circolante) {
       const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
       if (hints.includes('cancel') || hints.includes('soppress')) return t('cancelled');
-      const status = (ts.compRitardo || []).filter(s => s?.trim()).join(' ').trim();
+      const status = pickCompRitardo(ts.compRitardo || []);
       if (status) return status;
       return t('notStarted');
     }

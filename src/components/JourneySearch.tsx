@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { searchStations, searchSolutions, searchTrainNumber, getTrainStatus } from '../api/viaggiatreno';
-import { t } from '../i18n';
+import { t, pickCompRitardo } from '../i18n';
 import type { Station, JourneySolution, TrainStatus } from '../types';
 
 function toLocalDatetimeString(date: Date): string {
@@ -214,7 +214,7 @@ function getStatusDelayText(ts: TrainStatus) {
   if (!ts.circolante) {
     const hints = [...(ts.compRitardo || []), ts.subTitle || ''].join(' ').toLowerCase();
     if (hints.includes('cancel') || hints.includes('soppress')) return t('cancelled');
-    const status = (ts.compRitardo || []).filter(s => s?.trim()).join(' ').trim();
+    const status = pickCompRitardo(ts.compRitardo || []);
     if (status) return status;
     return t('notStarted');
   }

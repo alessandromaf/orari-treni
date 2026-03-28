@@ -218,6 +218,17 @@ export function getTimeLocale(): string {
   return timeLocales[currentLang];
 }
 
+// ViaggiaTreno compRitardo array indices: 0=it, 1=en, 2=de, 3=fr, 4=es, 5=ro, 6=ja, 7=zh, 8=ru
+const compRitardoIndex: Record<Lang, number> = { it: 0, en: 1, ru: 8 };
+
+export function pickCompRitardo(arr: string[]): string {
+  if (!arr || arr.length === 0) return '';
+  const idx = compRitardoIndex[currentLang] ?? 1;
+  const val = arr[idx]?.trim();
+  if (val) return val;
+  return arr[0]?.trim() || '';
+}
+
 export function formatDuration(diffMs: number): string {
   const h = Math.floor(diffMs / 3600000);
   const m = Math.round((diffMs % 3600000) / 60000);

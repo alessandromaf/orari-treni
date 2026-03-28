@@ -1,5 +1,5 @@
 import type { Train, BoardType } from '../types';
-import { t } from '../i18n';
+import { t, pickCompRitardo } from '../i18n';
 
 interface Props {
   train: Train;
@@ -8,6 +8,7 @@ interface Props {
 }
 
 function isCancelled(train: Train): boolean {
+  // Check all languages in compRitardo for cancel/suppress keywords
   const hints = [
     ...(train.compRitardo || []),
     train.subTitle || '',
@@ -27,7 +28,7 @@ function getDelayClass(train: Train): string {
 function formatDelay(train: Train): string {
   if (!train.circolante) {
     if (isCancelled(train)) return t('cancelled');
-    const status = (train.compRitardo || []).filter(s => s?.trim()).join(' ').trim();
+    const status = pickCompRitardo(train.compRitardo || []);
     if (status) return status;
     return t('notStarted');
   }
