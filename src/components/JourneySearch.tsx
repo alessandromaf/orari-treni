@@ -311,19 +311,11 @@ function SolutionCard({ solution, onTrainClick }: SolutionCardProps) {
 
       <div className="solution-footer">
         <div className="solution-trains-summary">
-          {solution.trains.map((tr, j) => {
-            const status = tr.trainNumber ? trainStatuses[tr.trainNumber] : null;
-            return (
+          {solution.trains.map((tr, j) => (
               <span key={j} className="train-badge">
                 {tr.name}
-                {status && (
-                  <span className={`train-badge-delay ${getStatusDelayClass(status)}`}>
-                    {' '}{getStatusDelayText(status)}
-                  </span>
-                )}
               </span>
-            );
-          })}
+          ))}
           {loadingStatuses && <span className="train-badge-loading" />}
         </div>
         {solution.price && (
